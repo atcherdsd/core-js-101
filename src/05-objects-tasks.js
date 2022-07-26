@@ -113,32 +113,91 @@ function fromJSON(proto, json) {
  */
 
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  itemsCollection: [],
+  order: 0,
+  value: '',
+  countError: new Error('Element, id and pseudo-element should not occur more then one time inside the selector'),
+  orderError: new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'),
+
+  checkOrder(order) {
+    if (this.order > order) throw this.orderError;
+  },
+  stringify() {
+    return this.value;
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  element(value) {
+    const item = Object.create(cssSelectorBuilder);
+    Object.assign(item, this);
+    if (this.itemsCollection.includes('element')) throw this.countError;
+    item.order = 1;
+    this.checkOrder(1);
+    item.itemsCollection = [...this.itemsCollection, 'element'];
+    item.value += value;
+    return item;
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    const item = Object.create(cssSelectorBuilder);
+    Object.assign(item, this);
+    if (this.itemsCollection.includes('id')) throw this.countError;
+    item.order = 2;
+    this.checkOrder(2);
+    item.itemsCollection = [...this.itemsCollection, 'id'];
+    item.value += `#${value}`;
+    return item;
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    const item = Object.create(cssSelectorBuilder);
+    Object.assign(item, this);
+    item.order = 3;
+    this.checkOrder(3);
+
+    item.itemsCollection = [...this.itemsCollection, 'class'];
+    item.value += `.${value}`;
+    return item;
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    const item = Object.create(cssSelectorBuilder);
+    Object.assign(item, this);
+    item.order = 4;
+    this.checkOrder(4);
+
+    item.itemsCollection = [...this.itemsCollection, 'attr'];
+    item.value += `[${value}]`;
+    return item;
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    const item = Object.create(cssSelectorBuilder);
+    Object.assign(item, this);
+    item.order = 5;
+    this.checkOrder(5);
+
+    item.itemsCollection = [...this.itemsCollection, 'pseudoClass'];
+    item.value += `:${value}`;
+    return item;
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    const item = Object.create(cssSelectorBuilder);
+    Object.assign(item, this);
+    if (this.itemsCollection.includes('pseudoElement')) throw this.countError;
+    item.order = 6;
+    this.checkOrder(6);
+    item.itemsCollection = [...this.itemsCollection, 'pseudoElement'];
+    item.value += `::${value}`;
+    return item;
+  },
+
+  combine(selector1, combinator, selector2) {
+    const item = Object.create(cssSelectorBuilder);
+    Object.assign(item, this);
+
+    item.value = `${this.value}${selector1.value} ${combinator} ${selector2.value}`;
+    return item;
   },
 };
 
