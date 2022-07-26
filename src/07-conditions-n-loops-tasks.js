@@ -422,8 +422,21 @@ function getCommonDirectoryPath(pathes) {
  *                         [ 6 ]]
  *
  */
-function getMatrixProduct(/* m1, m2 */) {
-  throw new Error('Not implemented');
+function getMatrixProduct(m1, m2) {
+  const result = Array(m1.length);
+
+  for (let i = 0; i < m1.length; i += 1) {
+    result[i] = Array(m2[0].length);
+  }
+  for (let j = 0; j < m2[0].length; j += 1) {
+    for (let k = 0; k < m1.length; k += 1) {
+      result[k][j] = 0;
+      for (let l = 0; l < m2.length; l += 1) {
+        result[k][j] += m1[k][l] * m2[l][j];
+      }
+    }
+  }
+  return result;
 }
 
 
@@ -457,8 +470,31 @@ function getMatrixProduct(/* m1, m2 */) {
  *    [    ,   ,    ]]
  *
  */
-function evaluateTicTacToePosition(/* position */) {
-  throw new Error('Not implemented');
+function evaluateTicTacToePosition(position) {
+  let winner;
+  const players = ['X', '0'];
+  const mainDiagonal = [];
+  const sideDiagonal = [];
+
+  players.forEach((playerSign) => {
+    for (let i = 0; i < position.length; i += 1) {
+      const rows = ([position[i][0], position[i][1], position[i][2]]);
+      const columns = ([position[0][i], position[1][i], position[2][i]]);
+
+      if (rows.every((ceil) => ceil === playerSign)
+          || columns.every((ceil) => ceil === playerSign)) {
+        winner = playerSign;
+      }
+      mainDiagonal.push(position[i][i]);
+      sideDiagonal.push(position[i][2 - i]);
+    }
+    if (mainDiagonal.every((ceil) => ceil === playerSign)
+        || sideDiagonal.every((ceil) => ceil === playerSign)) {
+      winner = playerSign;
+    }
+  });
+
+  return winner;
 }
 
 
